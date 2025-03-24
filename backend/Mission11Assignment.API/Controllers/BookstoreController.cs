@@ -18,9 +18,9 @@ namespace Mission11Assignment.API.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<Book> Get()
+        public IEnumerable<Book> Get(int pageCount = 10)
         {
-            return _bookstoreContext.Books.ToList();
+            return _bookstoreContext.Books.Take(pageCount).ToList(); // or just .ToList()
         }
     }
 }
