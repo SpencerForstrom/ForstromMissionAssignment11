@@ -1,31 +1,28 @@
+﻿using Mission11Assignment.API.Data;
 using Microsoft.EntityFrameworkCore;
-using Mission11Assignment.API.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --------------------------------------------
-// Configure services used by the application
-// --------------------------------------------
-
-
-// Add services/support to the container.
-
+// Add services to the container.
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// This code registers the SQLite database context using the Bookstore.sqlite file
+// Add your DbContext
 builder.Services.AddDbContext<BookDbContext>(options =>
-    options.UseSqlite("Data Source=Bookstore.sqlite"));
+{
+    options.UseSqlite(builder.Configuration.GetConnectionString("BookstoreConnection"));
+});
 
-// I ran into some issues Configuring CORS, but I finally got this to allow requests from the React app
+// Add named CORS policy
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp",
-        policy => policy.WithOrigins("http://localhost:5175")
-                        .AllowAnyHeader()
-                        .AllowAnyMethod());
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
 });
 
 var app = builder.Build();
@@ -37,10 +34,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// The lines below applies/enables the following: CORS policy/HTTPS/Authorization for middleware, etc.
-app.UseCors(x => x.WithOrigins("http://localhost:5175"));
-
+// Apply the CORS policy BEFORE Authorization
 app.UseHttpsRedirection();
+
+app.UseCors("AllowReactApp"); // Use the named policy here
 
 app.UseAuthorization();
 
