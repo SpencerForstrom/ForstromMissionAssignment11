@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Bookstore } from './types/Bookstore';
-import { useCart } from './context/CartContext'; // 👈 import this at the top
-import { useLocation } from 'react-router-dom'; // for "Continue Shopping" feature
+import { useCart } from './context/CartContext';
+import { useLocation } from 'react-router-dom'; // This is for "Continue Shopping" feature
 import CartSummary from './components/CartSummary';
+import { Toast, ToastContainer } from 'react-bootstrap'; // THIS IS THE TOAST FEATURE
+import 'bootstrap/dist/css/bootstrap.min.css'; // ✅ Still required
 
 
 function BookstoreList() {
@@ -12,11 +14,13 @@ function BookstoreList() {
   const [pageSize, setPageSize] = useState(5);
   const [page, setPage] = useState(1);
   const [totalBooks, setTotalBooks] = useState(0);
-  const [sortAsc, setSortAsc] = useState(true); // Currently not sent to backend
+  const [sortAsc, setSortAsc] = useState(true);
+  // part of the TOAST FEATURE
+  const [showToast, setShowToast] = useState(false);
   const { addToCart } = useCart();
   const location = useLocation(); // used to save return path
 
-  // Fetch list of categories for the filter dropdown
+  // This code is meant to fetch list of categories for the filter dropdown
   useEffect(() => {
     const fetchCategories = async () => {
       const res = await fetch('https://localhost:7245/api/Bookstore/categories');
@@ -26,7 +30,7 @@ function BookstoreList() {
     fetchCategories();
   }, []);
 
-  // Fetch list of books based on selected category, page, and page size
+  // What this does is fetch the list of books based on selected category, page, and page size
   useEffect(() => {
     const fetchBookstore = async () => {
       const res = await fetch(
@@ -42,37 +46,46 @@ function BookstoreList() {
 
   return (
     <>
+      {/* THIS IS THE FIRST BOOTSTRAP FEATURE I ADDED - Collapsing filters that can be toggled */}
       <h1>Bookstore</h1>
       <CartSummary />
       <br />
-
-      {/* Category Filter Dropdown */}
-      <div className="mb-3">
-        <label className="form-label">Filter by Category:</label>
-        <select
-          className="form-select"
-          value={selectedCategory}
-          onChange={(e) => {
-            setSelectedCategory(e.target.value);
-            setPage(1); // Reset to first page when filter changes
-          }}
-        >
-          <option value="">All Categories</option>
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Sort Button */}
       <button
-        className="btn btn-outline-primary mb-3"
-        onClick={() => setSortAsc(!sortAsc)}
-      >
-        Sort by Title: {sortAsc ? 'A → Z' : 'Z → A'}
+        className="btn btn-outline-secondary mb-2"
+        data-bs-toggle="collapse"
+        data-bs-target="#filterSection">
+        Toggle Filters
       </button>
+
+      <div className="collapse mb-3" id="filterSection">
+        <div className="card card-body">
+          {/* Filter dropdown */}
+          <div className="mb-3">
+            <label className="form-label">Filter by Category:</label>
+            <select
+              className="form-select"
+              value={selectedCategory}
+              onChange={(e) => {
+                setSelectedCategory(e.target.value);
+                setPage(1);
+              }}
+            >
+              <option value="">All Categories</option>
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Sort button */}
+          <button
+            className="btn btn-outline-primary"
+            onClick={() => setSortAsc(!sortAsc)}
+          >
+            Sort by Title: {sortAsc ? 'A → Z' : 'Z → A'}
+          </button>
+        </div>
+      </div>
 
       {/* Book Cards */}
       {bookstore
@@ -108,13 +121,15 @@ function BookstoreList() {
               });
             
               sessionStorage.setItem('returnPath', location.pathname + location.search);
-            }}
+              setShowToast(true);
+            }}            
           >
             Add to Cart
           </button>
         </div>
       </div>
     ))}
+
       <br />
 
       {/* Pagination Buttons */}
@@ -148,6 +163,18 @@ function BookstoreList() {
           </select>
         </label>
       </div>
+  {/* THIS IS THE SECOND BOOTSTRAP FEATURE I ADDED - toast pop ups for adding items to the cart */}
+  <ToastContainer position="bottom-end" className="p-3">
+  <Toast
+    bg="success"
+    show={showToast}
+    onClose={() => setShowToast(false)}
+    delay={2000}
+    autohide
+  >
+    <Toast.Body className="text-white">✅ Book added to cart!</Toast.Body>
+  </Toast>
+</ToastContainer>
     </>
   );
 }
