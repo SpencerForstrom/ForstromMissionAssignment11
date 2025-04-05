@@ -7,7 +7,7 @@ interface FetchBookstoreResponse {
   categories: string[];
 }
 
-const API_URL = 'https://bookstoreproject-forstrom-backend-gxapf6a7b9apbcbb.eastus-01.azurewebsites.net/api';
+const API_URL = 'https://bookstore-forstrom-backend2-a6fzd0dufjeffkhj.eastus-01.azurewebsites.net/api';
 
 // Export a function that fetches books with optional filtering by category
 export const fetchBooks = async (
