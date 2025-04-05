@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Bookstore } from './types/Bookstore';
-import { useCart } from './context/CartContext';
+import { Bookstore } from '../types/Bookstore';
+import { useCart } from '../context/CartContext';
 import { useLocation } from 'react-router-dom'; // This is for "Continue Shopping" feature
-import CartSummary from './components/CartSummary';
+import CartSummary from './CartSummary';
 import { Toast, ToastContainer } from 'react-bootstrap'; // THIS IS THE TOAST FEATURE
 import 'bootstrap/dist/css/bootstrap.min.css'; // ✅ Still required
+import { fetchBooks } from '../api/BookstoreAPI';
 
 
 function BookstoreList() {
@@ -19,30 +20,58 @@ function BookstoreList() {
   const [showToast, setShowToast] = useState(false);
   const { addToCart } = useCart();
   const location = useLocation(); // used to save return path
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // This code is meant to fetch list of categories for the filter dropdown
+  // useEffect(() => {
+  //   const fetchCategories = async () => {
+  //     const res = await fetch('https://localhost:7245/api/Bookstore/categories');
+  //     const data = await res.json();
+  //     setCategories(data);
+  //   };
+  //   fetchCategories();
+  // }, []);
+
   useEffect(() => {
-    const fetchCategories = async () => {
-      const res = await fetch('https://localhost:7245/api/Bookstore/categories');
-      const data = await res.json();
-      setCategories(data);
+    const loadBooks = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchBooks(pageSize, page, selectedCategory);
+
+        setBookstore(data.books);
+        setCategories(data.categories);
+        setTotalBooks(data.totalNumBooks);
+
+      } catch (error) {
+        setError((error as Error).message);
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchCategories();
-  }, []);
+  
+    loadBooks();
+  }, [pageSize, page, selectedCategory]);
+  
+
+  if (loading) return <p>Loading projects...</p>;
+  if (error) return <p className="text-red-500">Error {error}</p>;
+
+
 
   // What this does is fetch the list of books based on selected category, page, and page size
-  useEffect(() => {
-    const fetchBookstore = async () => {
-      const res = await fetch(
-        `https://localhost:7245/api/Bookstore?category=${selectedCategory}&page=${page}&pageSize=${pageSize}`
-      );
-      const data = await res.json();
-      setBookstore(data.books);
-      setTotalBooks(data.totalBooks);
-    };
+  // useEffect(() => {
+  //   const fetchBookstore = async () => {
+  //     const res = await fetch(
+  //       `https://localhost:7245/api/Bookstore?category=${selectedCategory}&page=${page}&pageSize=${pageSize}`
+  //     );
+  //     const data = await res.json();
+  //     setBookstore(data.books);
+  //     setTotalBooks(data.totalBooks);
+  //   };
 
-    fetchBookstore();
-  }, [selectedCategory, page, pageSize]);
+  //   fetchBookstore();
+  // }, [selectedCategory, page, pageSize]);
 
   return (
     <>

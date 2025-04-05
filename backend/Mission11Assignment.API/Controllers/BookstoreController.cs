@@ -58,5 +58,50 @@ namespace Mission11Assignment.API.Controllers
 
             return Ok(categories);
         }
+
+        [HttpPost("AddBook")]
+        public IActionResult AddBook([FromBody] Book newBook)
+        {
+            _bookstoreContext.Books.Add(newBook);
+            _bookstoreContext.SaveChanges();
+            return Ok(newBook);
+
+        }
+
+        [HttpPut("UpdateBook/{BookID}")]
+        public IActionResult UpdateBook(int BookID, [FromBody] Book updatedBook)
+        {
+            var existingBook = _bookstoreContext.Books.Find(BookID);
+
+            existingBook.Title = updatedBook.Title;
+            existingBook.Author = updatedBook.Author;
+            existingBook.Publisher = updatedBook.Publisher;
+            existingBook.ISBN = updatedBook.ISBN;
+            existingBook.Classification = updatedBook.Classification;
+            existingBook.Category = updatedBook.Category;
+            existingBook.PageCount = updatedBook.PageCount;
+            existingBook.Price = updatedBook.Price;
+
+            _bookstoreContext.Books.Update(existingBook);
+            _bookstoreContext.SaveChanges();
+
+            return Ok(existingBook);
+        }
+
+        [HttpDelete("DeleteBook/{BookID}")]
+        public IActionResult DeleteBook(int BookID)
+        {
+            var book = _bookstoreContext.Books.Find(BookID);
+
+            if (book == null)
+            {
+                return NotFound(new { message = "Project is not found" });
+            }
+
+            _bookstoreContext.Books.Remove(book);
+            _bookstoreContext.SaveChanges();
+
+            return NoContent();
+        }
     }
 }

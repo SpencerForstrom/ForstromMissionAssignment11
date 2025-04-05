@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "undefined/subscriptions/f7eb8c9b-9465-42c1-b83f-6a65e96153c5/resourceGroups/appsvc_windows_eastus/providers/Microsoft.Web/sites/BookstoreProject-Forstrom-Backend",
+    "appService.deploySubpath": "backend\\Mission11Assignment.API\\publish"
+}
